@@ -1,0 +1,5 @@
+.vagrant/
+*.log
+*.box
+secrets/
+alertmanager.yml.secret
