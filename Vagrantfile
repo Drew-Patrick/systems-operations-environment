@@ -10,4 +10,9 @@ Vagrant.configure("2") do |config|
     a.vm.hostname = "app"
     a.vm.network "private_network", ip: "10.42.10.10", virtualbox__intnet: "net10"
   end
+    config.vm.define "backup" do |b|
+    b.vm.box = "bento/rockylinux-9"
+    b.vm.hostname = "backup"
+    b.vm.network "private_network", ip: "10.42.20.10", virtualbox__intnet: "net20"
+  end
 end
