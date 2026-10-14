@@ -28,3 +28,17 @@ firewall-cmd --reload > /dev/null
 sshd -t
 systemctl restart sshd
 echo "backup: sshd listening on:"; ss -tlnp | grep sshd | grep -o ':[0-9]* ' | sort -u
+
+# --- receive backups from app (Lesson 8) ---
+dnf install -y -q rsync
+install -d -o vagrant -g vagrant /srv/backup
+install -d -m 700 -o vagrant -g vagrant /home/vagrant/.ssh
+touch /home/vagrant/.ssh/authorized_keys
+chown vagrant:vagrant /home/vagrant/.ssh/authorized_keys; chmod 600 /home/vagrant/.ssh/authorized_keys
+if [ -f /vagrant/provision/keys/app.pub ]; then
+  grep -qF "$(cat /vagrant/provision/keys/app.pub)" /home/vagrant/.ssh/authorized_keys \
+    || cat /vagrant/provision/keys/app.pub >> /home/vagrant/.ssh/authorized_keys
+  echo "backup: app key installed"
+else
+  echo "backup: no app.pub found; provision app first" >&2
+fi

@@ -1,0 +1,9 @@
+sudo tee /etc/systemd/system/backup.service > /dev/null <<'EOF'
+[Unit]
+Description=rsync /srv/data to backup
+
+[Service]
+Type=oneshot
+User=vagrant
+ExecStart=/usr/bin/bash /vagrant/scripts/backup.sh
+EOF
