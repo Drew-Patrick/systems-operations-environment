@@ -13,13 +13,21 @@ network:
 EOF
 chmod 600 /etc/netplan/*.yaml
 netplan apply
+
+ok=0
 for i in 1 2 3 4 5 6 7 8 9 10; do
-  if ip route show 10.42.20.0/24 | grep -q via; then
-    echo "app: route to 10.42.20.0/24 present"; break
+  if [[ "$(ip route show 10.42.20.0/24)" == *via* ]]; then
+    ok=1
+    break
   fi
   sleep 1
 done
-ip route show 10.42.20.0/24 | grep -q via || { echo "app: route missing" >&2; exit 1; }
+if [ "$ok" = 1 ]; then
+  echo "app: route to 10.42.20.0/24 present"
+else
+  echo "app: route to 10.42.20.0/24 missing after netplan apply" >&2
+  exit 1
+fi
 
 # --- SSH key and shortcut for the vagrant user (Lesson 6/8) ---
 H=/home/vagrant
@@ -43,7 +51,7 @@ cp "$H/.ssh/id_ed25519.pub" /vagrant/provision/keys/app.pub
 install -d -o vagrant -g vagrant /srv/data
 
 # --- scheduled backup (Lesson 9) ---
-cp /vagrant/provision/app/backup.service /vagrant/provision/app/backup.timer /etc/systemd/system/
+install -m 644 /vagrant/provision/app/backup.service /vagrant/provision/app/backup.timer /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now backup.timer
 echo "app: backup timer:"; systemctl list-timers backup.timer --no-pager | sed -n 2p
